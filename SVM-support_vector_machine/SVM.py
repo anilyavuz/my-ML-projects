@@ -57,8 +57,6 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 import numpy as np
 style.use('ggplot')
-data_dict = {-1: np.array([[1,7],[2,8],[3,8]]), 
-             1: np.array([[5,1],[6,-1],[7,3]])}
 
 
 class support_vector_machine:
@@ -72,6 +70,8 @@ class support_vector_machine:
     def fit(self,data):
         
         self.data=data
+        # {||w||: [w,b]}
+        opt_dict= {}
         transforms=[[1,1],
                     [1,-1],
                     [-1,1],
@@ -89,8 +89,8 @@ class support_vector_machine:
         ### keep stepping until you reach to yi((xi.w)+b) =1.01
         
         
-        step_sizes = [self.min_feature_value  * 0.1,
-                      self.min_feature_value *0.01,
+        step_sizes = [self.min_feature_value  * 0.1
+                    #   ,self.min_feature_value *0.01,
                       #point of expense
                     #   self.min_feature_value *0.001
                     ]
@@ -121,7 +121,7 @@ class support_vector_machine:
                         for i in self.data:
                             for xi in self.data[i]:
                                 yi = i
-                                if not yi(np.dot(xi,w)+b)>= 1:
+                                if not yi(np.dot(w_t,xi)+b)>= 1:
                                     found_option=False
                             
                         if found_option==True:
@@ -136,7 +136,7 @@ class support_vector_machine:
                     #step=1
                     #w-1=[4,4]
                     w=w-step
-            norms= sorted(i for i in opt_dict)
+            norms= sorted([i for i in opt_dict])
             #||w|| = [w,b]
             opt_choice = opt_dict[norms[0]]
             self.w = opt_choice[0]
@@ -150,7 +150,7 @@ class support_vector_machine:
         
         # sign(x.v+b)
         classification =np.sign(np.dot(np.array(features),self.w)+self.b)
-        if classification != 1 and visualization:
+        if classification != 1 and self.visualization:
             self.ax.scatter(features[0],features[1], s=200, marker = '*', c=self.colors[classification])        
         return classification
     
@@ -164,7 +164,7 @@ class support_vector_machine:
         #decision plane = 0
         
         def hyperplane(x,w,b,v):
-            return (w[0]*w-b+v)/w[1]
+            return (-w[0]*x-b+v)/w[1]
             
         datarange=(self.min_feature_value*0.9,self.max_feature_value*1.1)
         hypr_x_min = datarange[0]
@@ -175,18 +175,23 @@ class support_vector_machine:
         psv2 =hyperplane(hypr_x_max, self.w, self.b, 1)
         self.ax.plot([hypr_x_min,hypr_x_max],[psv1, psv2])
         
-        #x.w+b = 1
+        #x.w+b = -1
         #nsv negative hyperplane
         nsv1 = hyperplane(hypr_x_min, self.w, self.b, -1)
         nsv2 = hyperplane(hypr_x_max, self.w, self.b, -1)
         self.ax.plot([hypr_x_min, hypr_x_max], [nsv1, nsv2])
 
-        #x.w+b = 1
+        #x.w+b = 0
         #db hyperplane
         db1 = hyperplane(hypr_x_min, self.w, self.b, 0)
         db2 = hyperplane(hypr_x_max, self.w, self.b, 0)
         self.ax.plot([hypr_x_min, hypr_x_max], [db1, db2])
 
+        plt.show()
+
+
+data_dict = {-1: np.array([[1, 7], [2, 8], [3, 8],]),
+             1: np.array([[5, 1], [6, -1], [7, 3],])}
 
 svm = support_vector_machine()
 svm.fit(data=data_dict)
